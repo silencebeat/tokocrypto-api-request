@@ -75,12 +75,12 @@ class Tokocrypto {
         }
     }
 
-    async createorder(side, quantity, pairs){
+    async createorder(side, quantity, pairs, type){
         try {
             let response = await this.requestPrivate('/open/v1/orders', {
                 symbol: pairs,
                 side: (side.toUpperCase() === "buy")? 0: 1, 
-                type: 2,
+                type: type,
                 quantity: quantity
             }, 'post')
             return response

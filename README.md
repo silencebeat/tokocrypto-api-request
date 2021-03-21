@@ -8,3 +8,7 @@
 
 ## test
 require mocha installed
+
+## API Documentation
+https://www.tokocrypto.com/apidocs/#api-document-description
+
