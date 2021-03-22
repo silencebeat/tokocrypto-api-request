@@ -1,7 +1,7 @@
 const secret = require('./secret.json')
 const crypto = require('crypto')
 const axios = require("axios");
-const moment = require('moment')
+const moment = require('moment');
 const DOMAIN = 'https://www.tokocrypto.com'
 const APIKEY = secret.APIKEY
 const SECRETKEY = secret.SECRETKEY
@@ -24,13 +24,14 @@ class Tokocrypto {
         return a
     }
 
-    async requestPrivate(endpoint, param, method){
+    async requestPrivate(endpoint, param, method, domain){
 
         try {
             param.recvWindow = 5000
             param.timestamp = moment().valueOf()
 
-            let URL = `${DOMAIN}${endpoint}`
+            
+            let URL = (domain)? `${domain}${endpoint}`: `${DOMAIN}${endpoint}`
             let config = {
                 headers: {
                     'X-MBX-APIKEY': APIKEY
@@ -54,19 +55,16 @@ class Tokocrypto {
         }
     }
 
-    async requestPublic(endpoint, params){
+    async requestPublic(endpoint, params, domain){
         try {
 
-            let URL = `${DOMAIN}${endpoint}`
+            let URL = (domain)? `${domain}${endpoint}`: `${DOMAIN}${endpoint}`
             let config = {
                 headers: {
                     'X-MBX-APIKEY': APIKEY
                 }
             };
             config.params = params
-
-            console.log(config.params)
-
             let result =  await axios.get(URL, config)
             return result.data
         } catch (error) {
@@ -164,6 +162,52 @@ class Tokocrypto {
         }
     }
 
+    async depositAddress(asset, network){
+
+        try {
+            let response = await this.requestPrivate('/open/v1/deposits/address', {
+                asset: asset.toUpperCase(),
+                network
+            }, 'get')
+            return response
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    async depositHistory(body){
+
+        try {
+            let param = (body.isAll)? {}: {
+                asset: body.asset, status: body.status, fromId: body.fromId,
+                startTime: body.startTime,
+                endTime: body.endTime
+            }
+            let response = await this.requestPrivate('/open/v1/deposits', param, 'get')
+            return response
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    async withdrawHistory(body){
+
+        try {
+            let param = (body.isAll)? {}: {
+                asset: body.asset, status: body.status, fromId: body.fromId,
+                startTime: body.startTime,
+                endTime: body.endTime
+            }
+            let response = await this.requestPrivate('/open/v1/withdraws', param, 'get')
+            return response
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
     async orderbook(symbol){
         try {
             let response = await this.requestPublic('/open/v1/market/depth', {
@@ -200,6 +244,36 @@ class Tokocrypto {
         }
     }
 
+    async klines(symbol, interval, startTime, endTime, limit){
+        try {
+            let response = await this.requestPublic('/api/v1/klines', { 
+                symbol: symbol.replace("_",""),
+                interval: interval,
+                startTime: moment(startTime).valueOf(),
+                endTime: moment(endTime).valueOf(),
+                limit: (limit)? limit: 1000
+            },'https://api.binance.cc')
+            return response
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    async recentTradeList(symbol, fromId, limit){
+        try {
+            let response = await this.requestPublic('/api/v3/trades', { 
+                symbol: symbol.replace("_",""),
+                fromId,
+                limit: (limit)? limit: 1000
+            },'https://api.binance.cc')
+            return response
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
 }
 
 module.exports = new Tokocrypto()
@@ -210,7 +284,8 @@ module.exports = new Tokocrypto()
 //     // let a = await module.exports.accountTradeList("BNB")
 //    // let a = await module.exports.accountInformation()
 //     // let a = await module.exports.allOrders("BNB")
-//     let a = await module.exports.tradingSymbol()
+//     // let a = await module.exports.tradingSymbol()
+//     let a = await module.exports.klines("BTC_USDT", "4h", '2021-03-01','2021-03-21', 1000)
 //     // let a = await module.exports.serverTime()
 //     console.log(a)
 // }

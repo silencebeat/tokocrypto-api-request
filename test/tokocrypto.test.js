@@ -18,6 +18,18 @@ describe('public endpoint', function() {
         var response = await tokocrypto.serverTime();
         expect(response.msg).to.be.equal('Success');
       });   
+
+      it("klines", async function(){
+        var response = await tokocrypto.klines("BTC_USDT", "4h", '2021-03-01','2021-03-21', 1000);
+        expect(response).to.be.an('array');
+      });
+
+      it("recentTradeList", async function(){
+        var response = await tokocrypto.recentTradeList('BTC_USDT', null, 5);
+        expect(response).to.be.an('array');
+      });
+
+      
 });
 
 describe('private endpoint', function() {
@@ -48,6 +60,25 @@ describe('private endpoint', function() {
 
     it("allOrders", async function(){
       var response = await tokocrypto.allOrders("BNB_BIDR");
+      expect(response.msg).to.be.equal('Success');
+    });
+
+    it("deposit address", async function(){
+      var response = await tokocrypto.depositAddress("BTC", "BTC");
+      expect(response.msg).to.be.equal('Success');
+    });
+
+    it("deposit history", async function(){
+      var response = await tokocrypto.depositHistory({
+        isAll: true
+      });
+      expect(response.msg).to.be.equal('Success');
+    });
+
+    it("withdraw history", async function(){
+      var response = await tokocrypto.withdrawHistory({
+        isAll: true
+      });
       expect(response.msg).to.be.equal('Success');
     });
 
