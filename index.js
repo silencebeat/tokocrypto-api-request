@@ -6,7 +6,6 @@ const DOMAIN = 'https://www.tokocrypto.com'
 const APIKEY = secret.APIKEY
 const SECRETKEY = secret.SECRETKEY
 
-
 class Tokocrypto {
 
     getSignature(queryString) {
@@ -40,11 +39,13 @@ class Tokocrypto {
             param.signature = this.getSignature(this.generateQueryString(param))
             config.params = param
 
+            console.log(config)
+
             let result = null
             if (method === "get"){
                 result =  await axios.get(URL, config)
             }else if (method === "post"){
-                result =  await axios.get(URL, null, config)
+                result =  await axios.post(URL, null, config)
             }
 
             return (result)? result.data: result
@@ -73,13 +74,14 @@ class Tokocrypto {
         }
     }
 
-    async createorder(side, quantity, pairs, type){
+    async createorder(side, quantity, pairs, price, type){
         try {
             let response = await this.requestPrivate('/open/v1/orders', {
+                price: price,
+                quantity: quantity,
+                side: (side.toLowerCase() === "buy")? 0: 1,
                 symbol: pairs,
-                side: (side.toUpperCase() === "buy")? 0: 1, 
-                type: type,
-                quantity: quantity
+                type: type
             }, 'post')
             return response
         } catch (error) {
@@ -282,11 +284,13 @@ module.exports = new Tokocrypto()
 //     // let a = await module.exports.asset("bnb")
 //     // let a = await module.exports.queryOrder("1")
 //     // let a = await module.exports.accountTradeList("BNB")
-//    // let a = await module.exports.accountInformation()
+// //    let a = await module.exports.accountInformation()
 //     // let a = await module.exports.allOrders("BNB")
 //     // let a = await module.exports.tradingSymbol()
-//     let a = await module.exports.klines("BTC_USDT", "4h", '2021-03-01','2021-03-21', 1000)
+//     // let a = await module.exports.klines("BTC_USDT", "4h", '2021-03-01','2021-03-21', 1000)
 //     // let a = await module.exports.serverTime()
+//     let a = await module.exports.createorder('buy', 1, "TKO_BIDR", "45000", 1)
+//     // let a = await module.exports.cancelOrder("test-order-id");
 //     console.log(a)
 // }
 
